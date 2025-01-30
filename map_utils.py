@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 import logging
-from config import MAP_CONFIG, DATA_CONFIG
+from config import MAP_CONFIG, DATA_CONFIG, convert_drive_link
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +64,9 @@ def create_map(data, time_interval, selected_date, selected_location=None, proje
             mean_lat = MAP_CONFIG['default_lat']
             mean_long = MAP_CONFIG['default_long']
         
+        # Convert image URLs
+        location_summary['Direct_Image_URL'] = location_summary['Direct_Image_URL'].apply(convert_drive_link)
+        
         # Create map
         m = folium.Map(
             location=[mean_lat, mean_long],
@@ -90,6 +93,7 @@ def create_map(data, time_interval, selected_date, selected_location=None, proje
                 <b>Total Vehicles:</b> {int(total_vehicles):,}<br>
                 <b>Time:</b> {time_interval}<br>
                 <b>Volume/Capacity (v/c):</b> {v_c_ratio:.2f}
+                <img src='{row['Direct_Image_URL']}' width='100%'>
             </div>
             """
 
