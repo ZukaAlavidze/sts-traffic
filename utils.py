@@ -37,13 +37,14 @@ def validate_dataframe(df):
     logger.info(f"Current columns in DataFrame: {df.columns.tolist()}")
     logger.info(f"Required columns: {REQUIRED_COLUMNS}")
     
-    missing_cols = REQUIRED_COLUMNS - set(df.columns)
+    missing_cols = set(REQUIRED_COLUMNS) - set(df.columns)
     if missing_cols:
         return False, f"Missing required columns: {missing_cols}"
     
     if df.empty:
         return False, "DataFrame is empty"
     
+    # Fixed: Use correct case for column names
     if df['LAT'].isna().any() or df['LONG'].isna().any():
         logger.warning("Some coordinate data is missing")
     
