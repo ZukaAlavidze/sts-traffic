@@ -1,6 +1,7 @@
 # Configuration settings for the traffic analysis dashboard
 from datetime import datetime
 import logging
+import os
 
 # Set up logging
 logging.basicConfig(
@@ -9,12 +10,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# App settings
-APP_CONFIG = {
-    "page_title": "Traffic Volume Analysis Dashboard",
+
+# Streamlit page settings
+PAGE_CONFIG = {
+    "page_title": "STS: Traffic Count Dashboard",
     "layout": "wide",
     "initial_sidebar_state": "expanded"
 }
+# App settings
+APP_CONFIG = {
+    "images_path": os.path.join(os.path.dirname(__file__), "static", "images")
+}
+
 
 # Map settings
 MAP_CONFIG = {
@@ -33,20 +40,6 @@ DATA_CONFIG = {
     "chunk_size": 10000
 }
 
-def convert_drive_link(drive_link):
-    """Convert Google Drive sharing link to direct image URL"""
-    if not isinstance(drive_link, str):
-        return None
-    
-    if not drive_link or 'drive.google.com' not in drive_link:
-        return None
-    
-    try:
-        file_id = drive_link.split('/d/')[1].split('/view')[0]
-        return f"https://drive.google.com/uc?export=view&id={file_id}"
-    except (IndexError, AttributeError) as e:
-        logger.warning(f"Failed to convert drive link: {str(e)}")
-        return None
 
 # Column mappings for standardization
 COLUMN_MAPPINGS = {

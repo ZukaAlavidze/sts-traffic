@@ -1,10 +1,12 @@
 import streamlit as st
 import pandas as pd
 import logging
+import os
+import base64
 from pathlib import Path
 from datetime import datetime
 from streamlit_folium import folium_static
-from config import APP_CONFIG, DATA_CONFIG
+from config import PAGE_CONFIG, APP_CONFIG, DATA_CONFIG
 from utils import load_data, calculate_intersection_stats
 from map_utils import create_map
 
@@ -13,7 +15,20 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Must be the first Streamlit command
-st.set_page_config(**APP_CONFIG)
+st.set_page_config(
+    **PAGE_CONFIG,
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': None
+    }
+)
+
+# Add security headers
+st.markdown("""
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://drive.google.com;">
+""", unsafe_allow_html=True)
 
 @st.cache_data
 def load_css():
@@ -180,12 +195,35 @@ def main():
 
         # Second row: Intersection Image (full width)
         if stats.get('image_url'):
-            st.markdown(f"""
-                <div class="intersection-image">
-                    <h4>📸 Intersection Layout</h4>
-                    <img src="{stats['image_url']}" alt="Intersection layout">
-                </div>
-            """, unsafe_allow_html=True)
+            st.subheader("📸 Intersection Layout")
+            try:
+                image_path = stats['image_url']
+                logger.info(f"Attempting to load image from: {image_path}")
+                
+                # Debug: List available files
+                logger.info(f"Files in images directory: {os.listdir(APP_CONFIG['images_path'])}")
+                
+                if os.path.exists(image_path):
+                    with open(image_path, "rb") as f:
+                        image_bytes = f.read()
+                        encoded = base64.b64encode(image_bytes).decode()
+                        
+                    st.markdown(f"""
+                        <div style="width: 100%; max-width: 800px; margin: 0 auto;">
+                            <img src="data:image/png;base64,{encoded}" 
+                                alt="Intersection layout"
+                                style="width: 100%; height: auto; border-radius: 8px;">
+                        </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    logger.error(f"Image file not found: {image_path}")
+                    st.error(f"Image not found for Location {selected_location}")
+                    
+            except Exception as e:
+                logger.error(f"Error displaying image: {str(e)}")
+                st.error("Error loading intersection image")
+                if st.checkbox("Show error details"):
+                    st.exception(e)
 
         # Third row: Peak Flow Analysis (full width)
         st.subheader("🔄 Peak Flow Analysis")

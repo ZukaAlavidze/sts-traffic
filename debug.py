@@ -154,3 +154,11 @@ if __name__ == "__main__":
     check_data_consistency()
     validate_coordinates()
     print("Data validation and debugging complete.")
+
+
+# Photo debug logging
+if 'Direct_Image_URL' in location_data.columns:
+    logger.info(f"Image URLs found: {location_data['Direct_Image_URL'].tolist()}")
+    if not location_data['Direct_Image_URL'].empty:
+        image_url = location_data['Direct_Image_URL'].iloc[0]
+        logger.info(f"Selected image URL: {image_url}")
