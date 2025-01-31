@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import logging
 import os
 import base64
@@ -167,14 +168,22 @@ def main():
                 st.error(f"Error processing time intervals: {str(e)}")
                 return
             
+            # Initialize session state for location if not exists
+            if 'selected_location' not in st.session_state:
+                st.session_state.selected_location = None
+
             # Location selection
             try:
                 valid_locations = sorted(df['ID'].unique())
+                default_index = valid_locations.index(st.session_state.selected_location) if st.session_state.selected_location in valid_locations else 0
                 selected_location = st.selectbox(
                     "📍 Select Location",
                     options=valid_locations,
-                    format_func=lambda x: f"Location {x}"
+                    key='location_dropdown',
+                    format_func=lambda x: f"Location {x}",
+                    index=default_index
                 )
+                st.session_state.selected_location = selected_location
             except Exception as e:
                 st.error(f"Error processing locations: {str(e)}")
                 return
@@ -198,7 +207,31 @@ def main():
                 )
                 
                 if m is not None:
-                    st_folium(m, width=800, height=600)
+                    map_data = st_folium(m, width=800, height=600)
+                    
+                    # Handle map clicks only if a marker was clicked
+                    if (map_data.get('last_clicked') and 
+                        map_data.get('last_object_clicked') and 
+                        map_data['last_object_clicked'].get('lat')):
+                        
+                        clicked_lat = map_data['last_object_clicked']['lat']
+                        clicked_lng = map_data['last_object_clicked']['lng']
+                        
+                        # Get unique locations data
+                        location_data = df[['ID', 'LAT', 'LONG']].drop_duplicates()
+                        
+                        # Find exact marker match (using exact coordinates)
+                        exact_match = location_data[
+                            (location_data['LAT'] == clicked_lat) & 
+                            (location_data['LONG'] == clicked_lng)
+                        ]
+                        
+                        if not exact_match.empty:
+                            clicked_location = exact_match['ID'].iloc[0]
+                            if clicked_location != st.session_state.selected_location:
+                                st.session_state.selected_location = clicked_location
+                                selected_location = clicked_location  # Update local variable
+                                st.rerun()
                 else:
                     st.warning("Unable to create map with current selection")
 
