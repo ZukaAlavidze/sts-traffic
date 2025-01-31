@@ -16,27 +16,24 @@ def standardize_column_names(df):
     """
     Standardize column names across different file formats
     """
-    # First convert column names to lowercase and replace hyphens with spaces
+    # Convert column names to lowercase and replace hyphens with spaces
     df.columns = df.columns.str.lower().str.replace('-', ' ')
     
-    # Create mapping dictionary for all possible variations
+    # Create mapping dictionary
     mapping = {}
     for col in df.columns:
-        # Look for exact matches first
-        if col in COLUMN_MAPPINGS:
-            mapping[col] = COLUMN_MAPPINGS[col]
-            continue
-            
-        # Try matching without spaces
-        col_no_spaces = col.replace(' ', '')
-        for old_col, new_col in COLUMN_MAPPINGS.items():
-            old_col_no_spaces = old_col.lower().replace(' ', '').replace('-', '')
-            if col_no_spaces == old_col_no_spaces:
-                mapping[col] = new_col
-                break
+        col_lower = col.lower().replace('-', ' ')
+        # Check for direct matches first
+        if col_lower in [k.lower().replace('-', ' ') for k in COLUMN_MAPPINGS.keys()]:
+            for original, mapped in COLUMN_MAPPINGS.items():
+                if col_lower == original.lower().replace('-', ' '):
+                    mapping[col] = mapped
+                    break
     
-    # Apply the mapping
+    # Apply the mapping and remove any duplicate columns
     df = df.rename(columns=mapping)
+    df = df.loc[:, ~df.columns.duplicated()]
+    
     logger.info(f"Standardized columns: {df.columns.tolist()}")
     return df
 
