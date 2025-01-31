@@ -220,8 +220,9 @@ def main():
                 st.write("#### 🚗 Vehicle Composition")
                 for vehicle_type, percentage in stats['percentages'].items():
                     if percentage > 0:
-                        st.progress(percentage/100)
                         st.text(f"{vehicle_type}: {percentage:.1f}% ({stats['vehicle_composition'][vehicle_type]:,})")
+                        st.progress(percentage/100)
+                        
             else:
                 st.info("No vehicle composition data available")
 
