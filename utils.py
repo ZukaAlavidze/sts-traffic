@@ -16,16 +16,26 @@ def standardize_column_names(df):
     """
     Standardize column names across different file formats
     """
+    # First convert column names to lowercase and replace hyphens with spaces
     df.columns = df.columns.str.lower().str.replace('-', ' ')
     
+    # Create mapping dictionary for all possible variations
     mapping = {}
     for col in df.columns:
-        col_lower = col.lower()
+        # Look for exact matches first
+        if col in COLUMN_MAPPINGS:
+            mapping[col] = COLUMN_MAPPINGS[col]
+            continue
+            
+        # Try matching without spaces
+        col_no_spaces = col.replace(' ', '')
         for old_col, new_col in COLUMN_MAPPINGS.items():
-            if col_lower == old_col.lower():
+            old_col_no_spaces = old_col.lower().replace(' ', '').replace('-', '')
+            if col_no_spaces == old_col_no_spaces:
                 mapping[col] = new_col
                 break
     
+    # Apply the mapping
     df = df.rename(columns=mapping)
     logger.info(f"Standardized columns: {df.columns.tolist()}")
     return df
@@ -44,7 +54,6 @@ def validate_dataframe(df):
     if df.empty:
         return False, "DataFrame is empty"
     
-    # Fixed: Use correct case for column names
     if df['LAT'].isna().any() or df['LONG'].isna().any():
         logger.warning("Some coordinate data is missing")
     
@@ -100,7 +109,9 @@ def calculate_intersection_stats(df, location_id, time_interval, project_id=None
         filters.append(df['Project ID'] == project_id)
         
     # Drop duplicates before processing
-    location_data = df[np.all(filters, axis=0)].drop_duplicates(subset=['ID', 'Time Interval', 'Direction ID'])
+    location_data = df[np.all(filters, axis=0)].drop_duplicates(
+        subset=['ID', 'Time Interval', 'Direction ID']
+    )
     
     if location_data.empty:
         logger.warning(f"No data found for location {location_id}")
@@ -116,13 +127,11 @@ def calculate_intersection_stats(df, location_id, time_interval, project_id=None
         'Special vehicular', 'Motorcycle', 'Bicycle'
     ]
     
-    # Get single image URL (avoid duplicates)
-    image_url = None
-    if 'Direct_Image_URL' in location_data.columns:
-        unique_urls = location_data['Direct_Image_URL'].unique()
-        if len(unique_urls) > 0:
-            image_url = unique_urls[0]
-            logger.info(f"Selected image URL: {image_url}")
+    # Simplified image URL handling
+    image_url = (location_data['Direct_Image_URL'].iloc[0] 
+                if 'Direct_Image_URL' in location_data.columns 
+                and not location_data.empty 
+                else None)
     
     available_columns = [col for col in vehicle_columns if col in location_data.columns]
     total_vehicles = location_data['Total Vehicles'].sum()

@@ -63,6 +63,38 @@ def load_dataset(data_type):
         st.error(f"Error loading data: {str(e)}")
         st.stop()
 
+@st.cache_data
+def load_and_encode_image(image_path):
+    """Cache image loading and encoding"""
+    try:
+        if os.path.exists(image_path):
+            with open(image_path, "rb") as f:
+                image_bytes = f.read()
+                return base64.b64encode(image_bytes).decode()
+        return None
+    except Exception as e:
+        logger.error(f"Error loading image: {str(e)}")
+        return None
+
+def display_intersection_image(stats, selected_location):
+    """Handle intersection image display with caching"""
+    if not stats.get('image_url'):
+        return
+        
+    image_path = stats['image_url']
+    encoded_image = load_and_encode_image(image_path)
+    
+    if encoded_image:
+        st.markdown(f"""
+            <div style="width: 100%; max-width: 800px; margin: 0 auto;">
+                <img src="data:image/png;base64,{encoded_image}" 
+                    alt="Intersection layout"
+                    style="width: 100%; height: auto; border-radius: 8px;">
+            </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.error(f"Image not found for Location {selected_location}")
+
 def main():
     """Main application function"""
     try:
@@ -166,7 +198,7 @@ def main():
                 )
                 
                 if m is not None:
-                    st_folium(m, width=800, height=550)
+                    st_folium(m, width=800, height=600)
                 else:
                     st.warning("Unable to create map with current selection")
 
@@ -185,7 +217,7 @@ def main():
             
             # Vehicle composition
             if stats.get('percentages'):
-                st.write("##### 🚗 Vehicle Composition")
+                st.write("#### 🚗 Vehicle Composition")
                 for vehicle_type, percentage in stats['percentages'].items():
                     if percentage > 0:
                         st.progress(percentage/100)
@@ -196,34 +228,7 @@ def main():
         # Second row: Intersection Image (full width)
         if stats.get('image_url'):
             st.subheader("📸 Intersection Layout")
-            try:
-                image_path = stats['image_url']
-                logger.info(f"Attempting to load image from: {image_path}")
-                
-                # Debug: List available files
-                logger.info(f"Files in images directory: {os.listdir(APP_CONFIG['images_path'])}")
-                
-                if os.path.exists(image_path):
-                    with open(image_path, "rb") as f:
-                        image_bytes = f.read()
-                        encoded = base64.b64encode(image_bytes).decode()
-                        
-                    st.markdown(f"""
-                        <div style="width: 100%; max-width: 800px; margin: 0 auto;">
-                            <img src="data:image/png;base64,{encoded}" 
-                                alt="Intersection layout"
-                                style="width: 100%; height: auto; border-radius: 8px;">
-                        </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    logger.error(f"Image file not found: {image_path}")
-                    st.error(f"Image not found for Location {selected_location}")
-                    
-            except Exception as e:
-                logger.error(f"Error displaying image: {str(e)}")
-                st.error("Error loading intersection image")
-                if st.checkbox("Show error details"):
-                    st.exception(e)
+            display_intersection_image(stats, selected_location)
 
         # Third row: Peak Flow Analysis (full width)
         st.subheader("🔄 Peak Hour: Volumes Per Direction")
@@ -235,9 +240,9 @@ def main():
 
         if not direction_data.empty:
             st.bar_chart(
-            direction_data.set_index('Direction ID')['Total Vehicles'],
-            use_container_width=True,
-            height=400
+                direction_data.set_index('Direction ID')['Total Vehicles'],
+                use_container_width=True,
+                height=400
             )
         else:
             st.warning("No direction data available for the selected filters")

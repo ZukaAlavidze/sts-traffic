@@ -1,4 +1,3 @@
-# Configuration settings for the traffic analysis dashboard
 from datetime import datetime
 import logging
 import os
@@ -10,18 +9,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 # Streamlit page settings
 PAGE_CONFIG = {
     "page_title": "STS: Traffic Count Dashboard",
     "layout": "wide",
     "initial_sidebar_state": "expanded"
 }
+
 # App settings
 APP_CONFIG = {
     "images_path": os.path.join(os.path.dirname(__file__), "static", "images")
 }
-
 
 # Map settings
 MAP_CONFIG = {
@@ -40,20 +38,18 @@ DATA_CONFIG = {
     "chunk_size": 10000
 }
 
-
 # Column mappings for standardization
 COLUMN_MAPPINGS = {
     # Mappings for 15-minute data format
+    'time-intervals': 'Time Interval',
     'location-id': 'ID',
     'location-name': 'Name',
-    'time-intervals': 'Time Interval',
     'project-id': 'Project ID',
     'date': 'Date',
     'direction-id': 'Direction ID',
     'total-vehicles': 'Total Vehicles',
     'longitude': 'LONG',
     'latitude': 'LAT',
-    'image-url': 'URL',
     'car': 'Car',
     'microbus': 'Microbus',
     'bus': 'Bus',
@@ -62,7 +58,7 @@ COLUMN_MAPPINGS = {
     'motorcycle': 'Motorcycle',
     'bicycle': 'Bicycle',
     
-    # Mappings for hourly data format
+    # Mappings for hourly data format (these stay the same)
     'Project ID': 'Project ID',
     'Date': 'Date',
     'Time Interval': 'Time Interval',
