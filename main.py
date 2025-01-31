@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import logging
 import os
 import base64
@@ -209,29 +208,12 @@ def main():
                 if m is not None:
                     map_data = st_folium(m, width=800, height=600)
                     
-                    # Handle map clicks only if a marker was clicked
-                    if (map_data.get('last_clicked') and 
-                        map_data.get('last_object_clicked') and 
-                        map_data['last_object_clicked'].get('lat')):
-                        
-                        clicked_lat = map_data['last_object_clicked']['lat']
-                        clicked_lng = map_data['last_object_clicked']['lng']
-                        
-                        # Get unique locations data
-                        location_data = df[['ID', 'LAT', 'LONG']].drop_duplicates()
-                        
-                        # Find exact marker match (using exact coordinates)
-                        exact_match = location_data[
-                            (location_data['LAT'] == clicked_lat) & 
-                            (location_data['LONG'] == clicked_lng)
-                        ]
-                        
-                        if not exact_match.empty:
-                            clicked_location = exact_match['ID'].iloc[0]
-                            if clicked_location != st.session_state.selected_location:
-                                st.session_state.selected_location = clicked_location
-                                selected_location = clicked_location  # Update local variable
-                                st.rerun()
+                    # Simple click handling - just update if we got a marker click
+                    if map_data.get('last_object_clicked_name'):
+                        clicked_id = map_data['last_object_clicked_name']
+                        if clicked_id != st.session_state.selected_location:
+                            st.session_state.selected_location = clicked_id
+                            st.rerun()
                 else:
                     st.warning("Unable to create map with current selection")
 

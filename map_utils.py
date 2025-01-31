@@ -19,7 +19,7 @@ def create_color_marker(total_vehicles):
     """
     if total_vehicles < 1000:
         return 'green'
-    elif 1000< total_vehicles < 2500:
+    elif 1000 < total_vehicles < 2500:
         return 'orange'
     else:
         return 'red'
@@ -112,11 +112,7 @@ def create_map(data, time_interval, selected_date, selected_location=None, proje
                 location=[row['LAT'], row['LONG']],
                 popup=popup_content,
                 icon=folium.DivIcon(html=icon_html),
-                options={
-                    'clickable': True,
-                    'keyboard': False,  # Disable keyboard navigation
-                    'riseOnHover': True  # Makes markers more responsive
-                }
+                name=row['ID']  # Use the location ID as marker name
             ).add_to(m)
         
         return m
@@ -124,22 +120,3 @@ def create_map(data, time_interval, selected_date, selected_location=None, proje
     except Exception as e:
         logger.error(f"Error creating map: {str(e)}")
         return None
-
-def find_nearest_location(df, lat, lng):
-    """
-    Find the nearest location ID given latitude and longitude
-    """
-    if df.empty:
-        return None
-        
-    # Calculate distances to clicked point
-    df['distance'] = np.sqrt(
-        (df['LAT'] - lat)**2 + 
-        (df['LONG'] - lng)**2
-    )
-    
-    # Get ID of closest point
-    nearest_loc = df.loc[df['distance'].idxmin(), 'ID']
-    df.drop('distance', axis=1, inplace=True)
-    
-    return nearest_loc
