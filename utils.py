@@ -99,7 +99,8 @@ def calculate_intersection_stats(df, location_id, time_interval, project_id=None
     if project_id:
         filters.append(df['Project ID'] == project_id)
         
-    location_data = df[np.all(filters, axis=0)]
+    # Drop duplicates before processing
+    location_data = df[np.all(filters, axis=0)].drop_duplicates(subset=['ID', 'Time Interval', 'Direction ID'])
     
     if location_data.empty:
         logger.warning(f"No data found for location {location_id}")
@@ -115,11 +116,12 @@ def calculate_intersection_stats(df, location_id, time_interval, project_id=None
         'Special vehicular', 'Motorcycle', 'Bicycle'
     ]
     
-    # Debug logging for image URL
+    # Get single image URL (avoid duplicates)
+    image_url = None
     if 'Direct_Image_URL' in location_data.columns:
-        logger.info(f"Image URLs found: {location_data['Direct_Image_URL'].tolist()}")
-        if not location_data['Direct_Image_URL'].empty:
-            image_url = location_data['Direct_Image_URL'].iloc[0]
+        unique_urls = location_data['Direct_Image_URL'].unique()
+        if len(unique_urls) > 0:
+            image_url = unique_urls[0]
             logger.info(f"Selected image URL: {image_url}")
     
     available_columns = [col for col in vehicle_columns if col in location_data.columns]
@@ -135,11 +137,6 @@ def calculate_intersection_stats(df, location_id, time_interval, project_id=None
         for vehicle, count in vehicle_composition.items()
         if total_vehicles > 0
     }
-    
-    image_url = None
-    if 'Direct_Image_URL' in location_data.columns and not location_data['Direct_Image_URL'].empty:
-        image_url = location_data['Direct_Image_URL'].iloc[0]
-        logger.info(f"Returning image URL: {image_url}")
     
     return {
         'total_vehicles': total_vehicles,

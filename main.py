@@ -5,7 +5,7 @@ import os
 import base64
 from pathlib import Path
 from datetime import datetime
-from streamlit_folium import folium_static
+from streamlit_folium import st_folium
 from config import PAGE_CONFIG, APP_CONFIG, DATA_CONFIG
 from utils import load_data, calculate_intersection_stats
 from map_utils import create_map
@@ -69,8 +69,8 @@ def main():
         # Load CSS
         load_css()
         
-        st.title("🚗 Traffic Volume Analysis Dashboard")
-        st.write("Interactive dashboard for analyzing intersection traffic data.")
+        st.title("🚗 Traffic Studies Dashboard")
+        st.write("Interactive dashboard for analyzing intersection traffic data of Tbilisi, Georgia.")
 
         # ----------------------------------------
         # SIDEBAR CONTROLS
@@ -166,7 +166,7 @@ def main():
                 )
                 
                 if m is not None:
-                    folium_static(m, width=800)
+                    st_folium(m, width=800, height=550)
                 else:
                     st.warning("Unable to create map with current selection")
 
@@ -226,7 +226,7 @@ def main():
                     st.exception(e)
 
         # Third row: Peak Flow Analysis (full width)
-        st.subheader("🔄 Peak Flow Analysis")
+        st.subheader("🔄 Peak Hour: Volumes Per Direction")
         direction_data = df[
             (df['ID'] == selected_location) & 
             (df['Time Interval'] == time_interval) &
@@ -235,8 +235,9 @@ def main():
 
         if not direction_data.empty:
             st.bar_chart(
-                direction_data.set_index('Direction ID')['Total Vehicles'],
-                use_container_width=True
+            direction_data.set_index('Direction ID')['Total Vehicles'],
+            use_container_width=True,
+            height=400
             )
         else:
             st.warning("No direction data available for the selected filters")
