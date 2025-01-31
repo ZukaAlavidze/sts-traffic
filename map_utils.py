@@ -7,21 +7,19 @@ from config import MAP_CONFIG, DATA_CONFIG
 
 logger = logging.getLogger(__name__)
 
-def create_color_marker(total_vehicles, capacity=MAP_CONFIG['capacity_assumption']):
+def create_color_marker(total_vehicles):
     """
-    Determine marker color based on volume/capacity ratio
+    Determine marker color based on total vehicles
     
     Args:
         total_vehicles (int): Total vehicle count
-        capacity (int): Assumed capacity
         
     Returns:
         str: Color code for marker
     """
-    v_c_ratio = total_vehicles / capacity
-    if v_c_ratio < 0.6:
+    if total_vehicles < 1000:
         return 'green'
-    elif v_c_ratio < 0.8:
+    elif 1000 <= total_vehicles <= 2500:
         return 'orange'
     else:
         return 'red'
@@ -78,7 +76,6 @@ def create_map(data, time_interval, selected_date, selected_location=None, proje
                 continue
                 
             total_vehicles = row['Total Vehicles']
-            v_c_ratio = total_vehicles / MAP_CONFIG['capacity_assumption']
             is_selected = (selected_location == row['ID'])
             
             color = create_color_marker(total_vehicles)
@@ -88,8 +85,7 @@ def create_map(data, time_interval, selected_date, selected_location=None, proje
             <div style='width: 220px;'>
                 <h4 style="margin:5px 0;">{row['Name']}</h4>
                 <b>Total Vehicles:</b> {int(total_vehicles):,}<br>
-                <b>Time:</b> {time_interval}<br>
-                <b>Volume/Capacity (v/c):</b> {v_c_ratio:.2f}
+                <b>Time:</b> {time_interval}
             </div>
             """
 

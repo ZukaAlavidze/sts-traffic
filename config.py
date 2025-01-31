@@ -25,7 +25,6 @@ APP_CONFIG = {
 MAP_CONFIG = {
     "zoom_start": 14,
     "tile_style": "CartoDB positron",
-    "capacity_assumption": 1200,  # vehicles per hour
     "default_lat": 0,
     "default_long": 0
 }
