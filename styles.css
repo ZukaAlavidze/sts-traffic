@@ -1,45 +1,51 @@
+/* Global variables */
+
+:root {
+    --dark-background-color: #141623;
+    --light-text-color: white;
+    --progress-bar-color: #4CAF50;
+    --vehicle-composition-color: #e0e0e0;
+}
+
 /* Traffic Statistics Container */
 .stMetric {
-    background-color: #141623 !important;  /* Dark background */
+    background-color:
+var(--dark-background-color);
     padding: 1rem;
     border-radius: 0.5rem;
-    margin: 0.5rem 0;
+    margin: 0.5rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    color: white !important;  /* Light text */
+
+    /* Use a more accessible color scheme */
+    color: var(--light-text-color);
 }
 
 /* Progress bars in vehicle composition */
 .stProgress > div > div {
-    background-color: #4CAF50 !important;
-}
-
-.stProgress {
-    background-color: rgba(14, 16, 23, 0.1) !important;
+    background-color:
+var(--progress-bar-color);
 }
 
 /* Statistics text */
 [data-testid="stMetricValue"] {
-    color: white !important;
-}
-
-[data-testid="stMetricLabel"] {
-    color: #e0e0e0 !important;
+    color: var(--light-text-color);
 }
 
 /* Vehicle composition text */
 [data-testid="stVerticalBlock"] div {
-    color: #e0e0e0 !important;
+    color: var(--vehicle-composition-color);
 }
 
 /* Headers in statistics section */
 [data-testid="stVerticalBlock"] h5 {
-    color: white !important;
+    color: var(--light-text-color);
     margin-bottom: 1rem;
 }
 
 /* Container for statistics section */
 [data-testid="column"] {
-    background-color: #141623;
+    background-color:
+var(--dark-background-color);
     padding: 1rem;
     border-radius: 0.5rem;
     margin: 0.5rem;
