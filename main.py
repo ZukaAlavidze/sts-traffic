@@ -57,6 +57,9 @@ def load_dataset(data_type):
             
         # Ensure Date column is properly formatted
         df['Date'] = pd.to_datetime(df['Date']).dt.date
+        
+        # Ensure ID column is string type
+        df['ID'] = df['ID'].astype(str)
             
         return df
     except Exception as e:
