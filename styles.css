@@ -7,6 +7,23 @@
     --vehicle-composition-color: #e0e0e0;
 }
 
+/* Remove or comment out light mode styles */
+/*
+@media (prefers-color-scheme: light) {
+  body {
+    background-color: white;
+    color: black;
+  }
+  // ...existing code...
+}
+*/
+
+/* Always apply dark mode styles */
+body {
+  background-color: black;
+  color: white;
+}
+
 /* Traffic Statistics Container */
 .stMetric {
     background-color:
